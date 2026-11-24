@@ -108,7 +108,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-14">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-2xl font-bold text-slate-900">
-            {user ? `Gợi ý cho ${user.fullName.split(' ')[0]}` : 'Tour đang được quan tâm'}
+            {user ? `Gợi ý cho ${user.fullName.split(' ')[0]}` : 'Sự kiện & tour đang được quan tâm'}
           </h2>
           <Link to="/events" className="text-sm font-medium text-brand-700 hover:underline">
             Xem tất cả →

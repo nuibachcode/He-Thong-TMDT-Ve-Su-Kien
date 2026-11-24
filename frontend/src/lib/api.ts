@@ -6,7 +6,10 @@ export const GUEST_KEY = 'tmdt_guest_key'
 function guestKey() {
   let key = localStorage.getItem(GUEST_KEY)
   if (!key) {
-    key = crypto.randomUUID()
+    key =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `guest-${Date.now()}-${Math.random().toString(36).slice(2)}`
     localStorage.setItem(GUEST_KEY, key)
   }
   return key

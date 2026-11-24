@@ -161,8 +161,8 @@ Vẫn có thể chạy nhanh core-api với H2 như bản cũ, nhưng **khuyến
 # hạ tầng
 docker compose up -d postgres mongo redis rabbitmq
 
-# core-api (H2 hoặc postgres profile)
-cd backend; mvn spring-boot:run
+# core-api (H2 hoặc postgres profile) - chay o 8081 de khong trung gateway
+cd backend; $env:SERVER_PORT='8081'; mvn spring-boot:run
 
 # AI service
 cd services/ai; mvn spring-boot:run

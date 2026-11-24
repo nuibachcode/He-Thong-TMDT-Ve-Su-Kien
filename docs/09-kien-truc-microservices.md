@@ -127,6 +127,7 @@ thanh toán thành công và thanh toán lỗi/hết hạn giữ chỗ.
 |---|---|
 | Gateway xác thực JWT tại biên | Service con không phải lặp lại logic auth; dễ thay Identity sau này |
 | AI service tách riêng, WebFlux | RAG gọi API ngoài (Gemini) là I/O-bound; reactive phù hợp |
+| Gọi Gemini qua WebClient thay vì Spring AI | Kiểm soát trực tiếp prompt, citation và fallback; có thể thay bằng Spring AI khi cần |
 | pgvector thay vì vector store ngoài | Đủ cho ~1.000 chunk, giảm một service; đổi sang Qdrant chỉ thay repository |
 | Lexical fallback | Demo offline, không phụ thuộc quota/Internet |
 | Mongo cho card + sở thích | Dữ liệu đọc nhiều, schema linh hoạt; tách khỏi Postgres giao dịch |
