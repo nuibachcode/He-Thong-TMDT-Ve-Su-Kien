@@ -1,5 +1,9 @@
 # 09 — Kiến trúc microservices (bản đang chạy)
 
+> ✅ **Cập nhật:** hệ thống đã tách đủ 6 service: Identity (PostgreSQL), Catalog (MongoDB),
+> Inventory (PostgreSQL + Redis), Order (PostgreSQL), Payment (PostgreSQL), AI (pgvector/Mongo/Redis/RabbitMQ)
+> sau API Gateway. Thư mục `backend/` là monolith cũ, chỉ để tham khảo và không chạy trong compose.
+
 > Tài liệu này thay thế phần kiến trúc monolith trong `02-kien-truc.md` cho phiên bản Docker hiện tại.
 > Mục tiêu: bám theo báo cáo Nhóm 11 — Spring Boot 3 WebFlux, API Gateway, PostgreSQL/MongoDB/Redis/RabbitMQ,
 > AI/RAG dùng pgvector + Gemini, DDD/Hexagonal.

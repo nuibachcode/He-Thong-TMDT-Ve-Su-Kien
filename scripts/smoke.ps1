@@ -5,7 +5,7 @@ $ErrorActionPreference = 'Stop'
 $base = if ($env:GATEWAY_URL) { $env:GATEWAY_URL } else { 'http://localhost:8080' }
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
-Write-Host "1) Gateway -> core-api health"
+Write-Host "1) Gateway health"
 $core = Invoke-RestMethod "$base/api/health"
 Write-Host "   status=$($core.data.status) app=$($core.data.app)"
 

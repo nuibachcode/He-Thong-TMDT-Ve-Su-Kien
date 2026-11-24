@@ -1,12 +1,23 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getErrorMessage, getTickets, listBookings } from '../lib/api'
+import { cancelBooking, getErrorMessage, getTickets, listBookings } from '../lib/api'
 import { formatCurrency, formatDateTime } from '../lib/format'
 
 export default function MyTickets() {
+  const client = useQueryClient()
   const bookings = useQuery({ queryKey: ['bookings'], queryFn: listBookings })
   const [openCode, setOpenCode] = useState<string | null>(null)
+  const [error, setError] = useState('')
+
+  const cancel = useMutation({
+    mutationFn: cancelBooking,
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['bookings'] })
+      client.invalidateQueries({ queryKey: ['tickets'] })
+    },
+    onError: (err) => setError(getErrorMessage(err)),
+  })
 
   const tickets = useQuery({
     queryKey: ['tickets', openCode],
@@ -19,6 +30,7 @@ export default function MyTickets() {
       <h1 className="text-2xl font-bold text-slate-900">Vé của tôi</h1>
 
       {bookings.isLoading && <p className="mt-6 text-slate-500">Đang tải...</p>}
+      {error && <p className="mt-6 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
       {bookings.isError && <p className="mt-6 text-rose-600">{getErrorMessage(bookings.error)}</p>}
       {bookings.data?.length === 0 && (
         <p className="mt-6 text-slate-600">
@@ -42,7 +54,7 @@ export default function MyTickets() {
               </div>
             </div>
 
-            <div className="mt-3 flex gap-3 text-sm">
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
               {booking.status === 'PENDING' && (
                 <Link to={`/pay/${booking.code}`} className="rounded-lg bg-brand-600 px-3 py-1.5 font-medium text-white">
                   Thanh toán
@@ -54,6 +66,20 @@ export default function MyTickets() {
                   className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700"
                 >
                   {openCode === booking.code ? 'Đóng vé' : 'Xem vé QR'}
+                </button>
+              )}
+              {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+                <button
+                  disabled={cancel.isPending}
+                  onClick={() => {
+                    if (confirm(`Huỷ đơn ${booking.code}?`)) {
+                      setError('')
+                      cancel.mutate(booking.code)
+                    }
+                  }}
+                  className="rounded-lg border border-rose-200 px-3 py-1.5 font-medium text-rose-600 disabled:opacity-50"
+                >
+                  Huỷ đơn
                 </button>
               )}
             </div>

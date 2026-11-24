@@ -6,6 +6,7 @@ import {
   createTour,
   getErrorMessage,
   orgBookings,
+  orgCheckin,
   orgEvents,
   orgStats,
 } from '../lib/api'
@@ -39,6 +40,20 @@ export default function Organizer() {
     description: '',
   })
   const [describeInput, setDescribeInput] = useState({ destination: '', days: 3, interests: 'biển, ẩm thực' })
+  const [checkinForm, setCheckinForm] = useState({ bookingCode: '', ticketId: '' })
+  const [checkinMessage, setCheckinMessage] = useState('')
+
+  const checkin = useMutation({
+    mutationFn: () => orgCheckin(checkinForm.bookingCode.trim(), Number(checkinForm.ticketId)),
+    onSuccess: (message) => {
+      setCheckinMessage(message)
+      setError('')
+    },
+    onError: (err) => {
+      setCheckinMessage('')
+      setError(getErrorMessage(err))
+    },
+  })
 
   const submitEvent = useMutation({
     mutationFn: () =>
@@ -321,6 +336,45 @@ export default function Organizer() {
           </button>
         </form>
       </div>
+
+      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 className="font-semibold text-slate-900">Soát vé QR</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Nhập mã đơn và mã vé (ticket ID) để xác nhận vé đã sử dụng. Mỗi vé chỉ soát được một lần.
+        </p>
+        <form
+          className="mt-3 flex flex-wrap items-end gap-3"
+          onSubmit={(e) => {
+            e.preventDefault()
+            setCheckinMessage('')
+            checkin.mutate()
+          }}
+        >
+          <input
+            required
+            placeholder="Mã đơn, ví dụ TKT..."
+            value={checkinForm.bookingCode}
+            onChange={(e) => setCheckinForm({ ...checkinForm, bookingCode: e.target.value })}
+            className="min-w-48 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            required
+            type="number"
+            min={1}
+            placeholder="Ticket ID"
+            value={checkinForm.ticketId}
+            onChange={(e) => setCheckinForm({ ...checkinForm, ticketId: e.target.value })}
+            className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+          <button
+            disabled={checkin.isPending}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          >
+            {checkin.isPending ? 'Đang soát...' : 'Soát vé'}
+          </button>
+        </form>
+        {checkinMessage && <p className="mt-3 text-sm font-medium text-emerald-700">{checkinMessage}</p>}
+      </section>
     </div>
   )
 }

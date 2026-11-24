@@ -27,5 +27,9 @@ app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173}
   services:
-    core-uri: ${CORE_API_URL:http://localhost:8081}
+    identity-uri: ${IDENTITY_URL:http://localhost:8081}
+    catalog-uri: ${CATALOG_URL:http://localhost:8083}
+    inventory-uri: ${INVENTORY_URL:http://localhost:8084}
+    order-uri: ${ORDER_URL:http://localhost:8085}
+    payment-uri: ${PAYMENT_URL:http://localhost:8086}
     ai-uri: ${AI_SERVICE_URL:http://localhost:8082}

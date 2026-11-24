@@ -43,7 +43,7 @@ ai:
   reindex-on-start: ${AI_REINDEX_ON_START:false}
   gemini:
     api-key: ${GEMINI_API_KEY:}
-    chat-model: ${GEMINI_CHAT_MODEL:gemini-2.5-flash}
+    chat-model: ${GEMINI_CHAT_MODEL:gemini-3.5-flash}
     embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
   rag:
     top-k: 5

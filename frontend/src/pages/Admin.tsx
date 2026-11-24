@@ -4,6 +4,7 @@ import {
   adminAiMetrics,
   adminPending,
   adminSetContentStatus,
+  adminSetUserStatus,
   adminStats,
   adminUsers,
   getErrorMessage,
@@ -26,6 +27,13 @@ export default function Admin() {
       client.invalidateQueries({ queryKey: ['admin-pending'] })
       client.invalidateQueries({ queryKey: ['admin-stats'] })
     },
+    onError: (err) => setError(getErrorMessage(err)),
+  })
+
+  const lock = useMutation({
+    mutationFn: (input: { id: number; enabled: boolean }) =>
+      adminSetUserStatus(input.id, input.enabled),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['admin-users'] }),
     onError: (err) => setError(getErrorMessage(err)),
   })
 
@@ -104,9 +112,18 @@ export default function Admin() {
                     {user.email} · {user.role}
                   </p>
                 </div>
-                <span className={`text-xs font-semibold ${user.enabled ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {user.enabled ? 'Hoạt động' : 'Đã khoá'}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs font-semibold ${user.enabled ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {user.enabled ? 'Hoạt động' : 'Đã khoá'}
+                  </span>
+                  <button
+                    disabled={lock.isPending}
+                    onClick={() => lock.mutate({ id: user.id, enabled: !user.enabled })}
+                    className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 disabled:opacity-50"
+                  >
+                    {user.enabled ? 'Khoá' : 'Mở khoá'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

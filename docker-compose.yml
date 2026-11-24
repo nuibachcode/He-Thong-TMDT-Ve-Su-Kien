@@ -1,7 +1,7 @@
 name: ticketgo
 
 # ============================================================
-# TicketGo - ha tang microservices
+# TicketGo - microservices
 # Chay: docker compose up -d --build
 # Xem log: docker compose logs -f
 # Dung: docker compose down
@@ -75,31 +75,123 @@ services:
       retries: 20
     networks: [ticketgo]
 
-  # ---------- Ung dung ----------
-  # core-api: composite service tam thoi cho Identity/Catalog/Inventory/Order/Payment
-  # (se duoc tach dan thanh microservice; xem docs/09-kien-truc-microservices.md)
-  core-api:
+  # ---------- Microservices ----------
+  identity:
     build:
-      context: ./backend
-    container_name: ticketgo-core-api
+      context: ./services/identity
+    container_name: ticketgo-identity
+    expose: ["8081"]
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8081
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: ${CORE_DB:-core_db}
+      DB_NAME: identity_db
       DB_USER: ${POSTGRES_USER:-tmdt}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
-    ports:
-      - "${CORE_API_PORT:-8081}:8081"
     depends_on:
       postgres:
         condition: service_healthy
     networks: [ticketgo]
 
-  # ai-service: RAG + recommendation (Nui) - WebFlux, pgvector, MongoDB, Redis, RabbitMQ
+  catalog:
+    build:
+      context: ./services/catalog
+    container_name: ticketgo-catalog
+    expose: ["8083"]
+    environment:
+      SERVER_PORT: 8083
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      CATALOG_DB: catalog
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-tmdt}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-tmdt123}
+      INVENTORY_URL: http://inventory:8084
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      inventory:
+        condition: service_started
+    networks: [ticketgo]
+
+  inventory:
+    build:
+      context: ./services/inventory
+    container_name: ticketgo-inventory
+    expose: ["8084"]
+    environment:
+      SERVER_PORT: 8084
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: inventory_db
+      DB_USER: ${POSTGRES_USER:-tmdt}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [ticketgo]
+
+  order:
+    build:
+      context: ./services/order
+    container_name: ticketgo-order
+    expose: ["8085"]
+    environment:
+      SERVER_PORT: 8085
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: order_db
+      DB_USER: ${POSTGRES_USER:-tmdt}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-tmdt}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-tmdt123}
+      INVENTORY_URL: http://inventory:8084
+      CATALOG_URL: http://catalog:8083
+      IDENTITY_URL: http://identity:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      inventory:
+        condition: service_started
+      catalog:
+        condition: service_started
+      identity:
+        condition: service_started
+    networks: [ticketgo]
+
+  payment:
+    build:
+      context: ./services/payment
+    container_name: ticketgo-payment
+    expose: ["8086"]
+    environment:
+      SERVER_PORT: 8086
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: payment_db
+      DB_USER: ${POSTGRES_USER:-tmdt}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      ORDER_URL: http://order:8085
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      order:
+        condition: service_started
+    networks: [ticketgo]
+
   ai-service:
     build:
       context: ./services/ai
@@ -108,28 +200,25 @@ services:
       SERVER_PORT: 8082
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      AI_DB: ${AI_DB:-ai_db}
+      AI_DB: ai_db
       POSTGRES_USER: ${POSTGRES_USER:-tmdt}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
-      MONGO_URI: mongodb://mongo:27017/${MONGO_DB:-ai}
+      MONGO_URI: mongodb://mongo:27017/ai
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-tmdt}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-tmdt123}
-      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
       AI_PROVIDER: ${AI_PROVIDER:-mock}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-2.5-flash}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-3.5-flash}
       GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL:-gemini-embedding-001}
       AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-768}
       AI_REINDEX_ON_START: ${AI_REINDEX_ON_START:-false}
       AI_CACHE_ENABLED: ${AI_CACHE_ENABLED:-true}
       AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
       AI_RATE_LIMIT_PER_MINUTE: ${AI_RATE_LIMIT_PER_MINUTE:-20}
-    ports:
-      - "${AI_SERVICE_PORT:-8082}:8082"
     depends_on:
       postgres:
         condition: service_healthy
@@ -141,7 +230,6 @@ services:
         condition: service_healthy
     networks: [ticketgo]
 
-  # gateway: cua ngo duy nhat cho frontend, xac thuc JWT + CORS + dinh tuyen
   gateway:
     build:
       context: ./services/gateway
@@ -149,14 +237,28 @@ services:
     environment:
       SERVER_PORT: 8080
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
-      CORE_API_URL: http://core-api:8081
+      IDENTITY_URL: http://identity:8081
+      CATALOG_URL: http://catalog:8083
+      INVENTORY_URL: http://inventory:8084
+      ORDER_URL: http://order:8085
+      PAYMENT_URL: http://payment:8086
       AI_SERVICE_URL: http://ai-service:8082
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173}
     ports:
       - "${GATEWAY_PORT:-8080}:8080"
     depends_on:
-      - core-api
-      - ai-service
+      identity:
+        condition: service_started
+      catalog:
+        condition: service_started
+      inventory:
+        condition: service_started
+      order:
+        condition: service_started
+      payment:
+        condition: service_started
+      ai-service:
+        condition: service_started
     networks: [ticketgo]
 
   frontend:
@@ -166,7 +268,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-5173}:80"
     depends_on:
-      - gateway
+      gateway:
+        condition: service_started
     networks: [ticketgo]
 
 networks:

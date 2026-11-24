@@ -292,8 +292,13 @@ export const createTour = (payload: {
 export const aiDescribe = (payload: { destination: string; days: number; interests: string }) =>
   unwrap(api.post<ApiEnvelope<{ description: string }>>('/organizer/ai/describe', payload))
 
+export const orgCheckin = (bookingCode: string, ticketId: number) =>
+  unwrap(api.post<ApiEnvelope<string>>('/organizer/checkin', { bookingCode, ticketId }))
+
 export const adminStats = () => unwrap(api.get<ApiEnvelope<AdminStats>>('/admin/stats/overview'))
 export const adminUsers = () => unwrap(api.get<ApiEnvelope<AdminUser[]>>('/admin/users'))
+export const adminSetUserStatus = (id: number, enabled: boolean) =>
+  unwrap(api.patch<ApiEnvelope<string>>(`/admin/users/${id}/status`, { enabled }))
 export const adminPending = () => unwrap(api.get<ApiEnvelope<PendingItem[]>>('/admin/pending'))
 export const adminSetContentStatus = (type: string, id: number, status: string) =>
   unwrap(api.patch<ApiEnvelope<string>>(`/admin/content/${type}/${id}/status`, { status }))

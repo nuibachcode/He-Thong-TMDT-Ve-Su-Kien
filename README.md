@@ -23,14 +23,14 @@ Mở:
 | API Gateway | http://localhost:8080 |
 | AI service (debug) | http://localhost:8082 |
 | RabbitMQ Management | http://localhost:15672 (`tmdt` / `tmdt123`) |
-| PostgreSQL | `localhost:5432` (db `core_db`, `ai_db`) |
+| PostgreSQL | `localhost:5432` (db `identity_db`, `inventory_db`, `order_db`, `payment_db`, `ai_db`) |
 | MongoDB | `localhost:27017` (db `ai`) |
 | Redis | `localhost:6379` |
 
 Kiểm tra nhanh:
 
 ```powershell
-Invoke-RestMethod http://localhost:8080/api/health        # core-api qua gateway
+Invoke-RestMethod http://localhost:8080/api/health        # gateway health
 Invoke-RestMethod http://localhost:8080/api/ai/health     # AI service
 ```
 
@@ -57,13 +57,11 @@ Voucher demo: `WELCOME10` (giảm 10%, tối đa 300k), `TOUR500` (giảm 500k c
 ```
 React + Vite (nginx) ──/api──▶ API Gateway :8080
                                   │ JWT + CORS + định tuyến
-                  ┌───────────────┴────────────────┐
-             /api/ai/**                      các /api/** khác
-                  │                                │
-            AI Service :8082                core-api :8081
-        RAG + recommendation            Identity/Catalog/Inventory/
-        pgvector · MongoDB ·            Order/Payment (composite,
-        Redis · RabbitMQ                đang tách dần)
+   ┌──────────┬──────────┬────────┼──────────┬──────────┬──────────┐
+   ▼          ▼          ▼        ▼          ▼          ▼          ▼
+Identity   Catalog   Inventory  Order     Payment   AI Service  (frontend)
+ :8081      :8083      :8084    :8085      :8086      :8082
+Postgres   MongoDB    PG+Redis  Postgres   Postgres   pgvector+Mongo+Redis
 ```
 
 Chi tiết: [docs/09-kien-truc-microservices.md](docs/09-kien-truc-microservices.md).
@@ -71,20 +69,23 @@ Chi tiết: [docs/09-kien-truc-microservices.md](docs/09-kien-truc-microservices
 | Thành phần | Vai trò | Công nghệ |
 |---|---|---|
 | `services/gateway` | Định tuyến, xác thực JWT, CORS, phân quyền thô | Spring Cloud Gateway (WebFlux) |
+| `services/identity` | Tài khoản, đăng nhập, JWT, quản lý user | Spring Boot 3.5, JPA, PostgreSQL |
+| `services/catalog` | Sự kiện, tour, tìm kiếm, duyệt nội dung | Spring Boot 3.5, MongoDB |
+| `services/inventory` | Hạng vé, tồn kho, giữ chỗ Redis, vé QR, check-in | Spring Boot 3.5, JPA, Redis |
+| `services/order` | Đơn hàng, voucher, vòng đời đơn, saga compensation | Spring Boot 3.5, JPA, RabbitMQ |
+| `services/payment` | Cổng thanh toán sandbox, callback/idempotency | Spring Boot 3.5, JPA |
 | `services/ai` | Chat RAG, embedding, gợi ý, feedback, metrics | Spring Boot 3.5 WebFlux, R2DBC, Mongo, Redis, AMQP |
-| `backend` (core-api) | Nghiệp vụ mua vé, catalog, organizer, admin | Spring Boot, JPA, PostgreSQL |
 | `frontend` | Giao diện người dùng + chat + gợi ý | React 19, Vite, TypeScript, Tailwind |
-| `infra/postgres/init.sql` | Tạo `core_db`, `ai_db`, extension pgvector | PostgreSQL 16 |
+| `infra/postgres/init.sql` | Tạo database cho từng service + pgvector | PostgreSQL 16 |
 
-`core-api` là composite service tạm thời để demo end-to-end; khi tách Identity/Catalog/Inventory/Order/Payment
-thành service riêng, chỉ cần thêm route trong gateway.
+`backend/` là monolith cũ, chỉ giữ để tham khảo; **không được start trong Docker Compose hiện tại**.
 
 ## 3. AI/RAG
 
 - Dữ liệu mẫu: 4 sự kiện, 5 tour, 4 tài liệu chính sách (hoàn/hủy, thanh toán, vé QR, trẻ em/hành lý).
 - Pipeline: ingest → chunk 1.400 ký tự → embedding → pgvector top-k → prompt + guardrail → trả lời kèm citation.
 - `AI_PROVIDER=mock` (mặc định): embedding lexical + trả lời trích xuất, **không cần Internet/quota**.
-- `AI_PROVIDER=gemini` + `GEMINI_API_KEY=...`: dùng `gemini-embedding-001` (768 chiều) và `gemini-2.5-flash`.
+- `AI_PROVIDER=gemini` + `GEMINI_API_KEY=...`: dùng `gemini-embedding-001` (768 chiều) và `gemini-3.5-flash`.
 - Citation có `url` để frontend mở thẳng trang sự kiện/tour.
 - Redis cache embedding + câu trả lời; rate limit 20 tin/phút; guardrail từ chối câu ngoài phạm vi.
 - Gợi ý theo sở thích đã lưu (`PUT /api/ai/interests`) hoặc độ phổ biến.
@@ -146,7 +147,7 @@ Xem [.env.example](.env.example). Quan trọng:
 
 | Biến | Ý nghĩa |
 |---|---|
-| `JWT_SECRET` | Bắt buộc ≥ 32 ký tự, dùng chung gateway/core/AI |
+| `JWT_SECRET` | Bắt buộc ≥ 32 ký tự, dùng chung identity + gateway + AI |
 | `POSTGRES_*` | Tài khoản PostgreSQL |
 | `AI_PROVIDER` | `mock` hoặc `gemini` |
 | `GEMINI_API_KEY` | Key Gemini (không commit) |
@@ -155,47 +156,45 @@ Xem [.env.example](.env.example). Quan trọng:
 
 ## 7. Chạy dev không Docker (tuỳ chọn)
 
-Vẫn có thể chạy nhanh core-api với H2 như bản cũ, nhưng **khuyến nghị Docker** để đúng kiến trúc:
+Khuyến nghị dùng Docker. Nếu chạy local, bật hạ tầng trước rồi chạy từng service:
 
 ```powershell
-# hạ tầng
 docker compose up -d postgres mongo redis rabbitmq
 
-# core-api (H2 hoặc postgres profile) - chay o 8081 de khong trung gateway
-cd backend; $env:SERVER_PORT='8081'; mvn spring-boot:run
-
-# AI service
-cd services/ai; mvn spring-boot:run
-
-# gateway
-cd services/gateway; mvn spring-boot:run
-
-# frontend
-cd frontend; npm install; npm run dev
+cd services/identity;  $env:DB_HOST='localhost'; mvn spring-boot:run
+cd services/catalog;   $env:MONGO_HOST='localhost'; $env:INVENTORY_URL='http://localhost:8084'; mvn spring-boot:run
+cd services/inventory; $env:DB_HOST='localhost'; mvn spring-boot:run
+cd services/order;     $env:DB_HOST='localhost'; mvn spring-boot:run
+cd services/payment;   $env:DB_HOST='localhost'; mvn spring-boot:run
+cd services/ai;        mvn spring-boot:run
+cd services/gateway;   mvn spring-boot:run
+cd frontend;           npm install; npm run dev
 ```
 
-## 8. Trạng thái và việc tiếp theo
+## 8. Trạng thái
 
 Đã có:
 
 - Hạ tầng Docker Compose (PostgreSQL/pgvector, MongoDB, Redis, RabbitMQ) + healthcheck.
 - API Gateway JWT/CORS/định tuyến, chống giả mạo header.
-- AI service WebFlux: RAG, citation có link, gợi ý theo sở thích, cache, rate limit, reindex, metrics.
-- Frontend chat + khu gợi ý + Docker/nginx.
-- core-api chạy PostgreSQL trong Docker, giữ nguyên luồng mua vé/QR/organizer/admin.
+- Identity (PostgreSQL), Catalog (MongoDB), Inventory (PostgreSQL + Redis), Order (PostgreSQL),
+  Payment (PostgreSQL), AI (pgvector/Mongo/Redis/RabbitMQ) — mỗi service database riêng.
+- Luồng mua vé → giữ chỗ Redis → thanh toán sandbox → QR → check-in chạy end-to-end.
+- AI RAG Gemini/lexical, citation có link, gợi ý theo sở hữu/độ phổ biến, cache, rate limit, reindex, metrics.
+- Frontend chat + gợi ý + huỷ đơn + admin khoá user + organizer soát vé.
+- Saga compensation: order gọi inventory release khi huỷ/hết hạn; job hết hạn ở cả hai phía.
 
-Tiếp theo (đúng báo cáo):
+Còn có thể nâng cấp:
 
-- Tách core-api thành Identity (PostgreSQL), Catalog (MongoDB), Inventory (PostgreSQL + Redis),
-  Order (PostgreSQL), Payment (PostgreSQL).
-- Adapter thanh toán VNPay/MoMo sandbox + callback.
-- Saga đầy đủ qua RabbitMQ (command/reply, compensation).
-- Bổ sung test tranh vé đồng thời và bộ 20 câu vàng cho RAG.
+- Adapter VNPay/MoMo sandbox thật (hiện là cổng mock qua `PaymentGateway`).
+- Saga command/reply đầy đủ qua RabbitMQ thay cho HTTP + event.
+- Bộ test tranh vé đồng thời và 20 câu vàng.
 
 ## 9. Ghi chú kỹ thuật
 
-- Gateway/AI dùng Java 21, Spring Boot 3.5; core giữ Spring Boot 4 nhưng build target Java 21.
+- Toàn bộ service dùng Java 21, Spring Boot 3.5; gateway/AI dùng WebFlux, domain service dùng MVC/JPA.
 - PostgreSQL dùng `pgvector/pgvector:pg16`; extension `vector` tạo trong `ai_db`.
 - R2DBC không bind trực tiếp kiểu `vector`; repository dựng literal số từ embedding (an toàn, không chứa input người dùng).
 - Header `X-User-*` chỉ do gateway gắn sau khi xác thực; client gửi lên sẽ bị xoá.
 - Guest chat dùng `X-Guest-Key` (UUID lưu localStorage) để giữ phiên và rate limit.
+- `.env` chứa Gemini key và không được commit; chỉ commit `.env.example`.
