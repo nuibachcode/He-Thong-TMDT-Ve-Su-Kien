@@ -1,5 +1,10 @@
 # BẢN KẾ HOẠCH DỰ ÁN
 
+> ⚠️ **Tài liệu lịch sử (bản monolith, 3 người).** Kế hoạch và kiến trúc đang dùng nằm ở
+> [`README.md`](README.md), [`docs/09-kien-truc-microservices.md`](docs/09-kien-truc-microservices.md)
+> và [`docs/10-quy-uoc-code.md`](docs/10-quy-uoc-code.md). Phần phân công theo thành viên trong file này
+> không còn dùng cho bản hiện tại.
+
 **Đề tài:** Hệ thống thương mại điện tử vé sự kiện và tour du lịch tích hợp AI/RAG
 **Quy mô:** nhóm 3 người · **Thời gian:** 4 tuần (20 ngày làm việc ≈ 60 người-ngày)
 **Stack:** Java 25 · Spring Boot 4 · React 19 + Vite · MySQL 8 (H2 khi dev) · RAG tự viết, AI free tier

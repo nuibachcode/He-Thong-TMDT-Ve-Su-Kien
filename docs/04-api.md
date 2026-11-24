@@ -1,5 +1,9 @@
 # 04 — Hợp đồng API (chốt từ Ngày 1)
 
+> ⚠️ Hợp đồng API của bản microservices/Docker đang chạy nằm ở
+> [`09-kien-truc-microservices.md`](09-kien-truc-microservices.md) (mục API Gateway và AI service).
+> Tài liệu này giữ lại cho các endpoint core-api cũ.
+
 > Mục đích: FE và BE code song song mà không chờ nhau. **Mọi thay đổi API phải báo trong nhóm chat và cập nhật file này.**
 > Base URL dev: `http://localhost:8080` · Swagger: `http://localhost:8080/swagger-ui.html`
 

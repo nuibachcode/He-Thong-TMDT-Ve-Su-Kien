@@ -16,8 +16,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("""
             select e from Event e
             where e.status = 'PUBLISHED'
-              and (:q is null or lower(e.title) like lower(concat('%', :q, '%')))
-              and (:category is null or e.category = :category)
+              and (cast(:q as string) is null or lower(e.title) like lower(concat('%', cast(:q as string), '%')))
+              and (cast(:category as string) is null or e.category = cast(:category as string))
             order by e.startAt asc
             """)
     List<Event> search(@Param("q") String q, @Param("category") String category);

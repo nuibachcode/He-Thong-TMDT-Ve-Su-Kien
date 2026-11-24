@@ -1,0 +1,28 @@
+# Profile dung trong docker compose: PostgreSQL thay cho H2 file.
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:core_db}
+    username: ${DB_USER:tmdt}
+    password: ${DB_PASSWORD:tmdt123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  h2:
+    console:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-key-change-me-please-32bytes-min}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+
+logging:
+  level:
+    vn.edu.tmdt: INFO

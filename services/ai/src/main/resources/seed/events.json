@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "title": "Đêm nhạc Trịnh Công Sơn — Tình yêu và biển",
+    "slug": "dem-nhac-trinh-cong-son",
+    "category": "music",
+    "venue": "Nhà hát lớn Hà Nội",
+    "city": "Hà Nội",
+    "startAt": "2026-12-20T20:00:00+07:00",
+    "priceFrom": 700000,
+    "coverImageUrl": "https://picsum.photos/seed/trinh/1200/700",
+    "tags": ["âm nhạc", "trịnh công sơn", "hà nội", "hòa nhạc", "cuối tuần"],
+    "popularity": 95,
+    "description": "Đêm nhạc tưởng nhớ Trịnh Công Sơn với sự tham gia của dàn nhạc giao hưởng và ba giọng ca khách mời. Chương trình gồm hai phần: \"Tình yêu\" với những bản tình ca quen thuộc và \"Biển\" với các ca khúc viết về biển đảo, quê hương. Sân khấu được thiết kế theo phong cách tối giản, ánh sáng ấm. Thời lượng khoảng 120 phút, có nghỉ giữa hiệp 15 phút. Khán giả được mang theo máy ảnh không flash. Chương trình phù hợp với khán giả từ 12 tuổi trở lên. Giá vé VIP 1.500.000 đồng gồm ghế hàng đầu, lối đi riêng và đồ uống chào mừng; vé Standard 700.000 đồng cho khu vực giữa và sau. Địa điểm tại Nhà hát lớn Hà Nội, số 1 Tràng Tiền, quận Hoàn Kiếm."
+  },
+  {
+    "id": 2,
+    "title": "Hài kịch: Chuyện Nhà Bên",
+    "slug": "hai-kich-chuyen-nha-ben",
+    "category": "theater",
+    "venue": "Nhà hát Bến Thành",
+    "city": "TP. Hồ Chí Minh",
+    "startAt": "2026-12-05T19:30:00+07:00",
+    "priceFrom": 350000,
+    "coverImageUrl": "https://picsum.photos/seed/comedy/1200/700",
+    "tags": ["hài kịch", "sân khấu", "tp hồ chí minh", "gia đình", "cuối tuần"],
+    "popularity": 82,
+    "description": "Vở hài kịch tình huống về một khu chung cư cũ, nơi hàng xóm can thiệp vào đời sống của nhau bằng những \"lời khuyên\" không ai yêu cầu. Kịch bản dựa trên các tình huống đời thường, nhiều tình tiết bất ngờ, phù hợp để thư giãn cuối tuần. Vở diễn dài 105 phút, không có nghỉ giữa hiệp. Khán giả từ 10 tuổi trở lên. Có hai hạng vé: Standard 350.000 đồng và Couple 600.000 đồng cho gói hai ghế cạnh nhau kèm nước uống. Địa điểm tại Nhà hát Bến Thành, số 6 Mạc Đĩnh Chi, quận 1, TP. Hồ Chí Minh. Suất diễn bắt đầu lúc 19:30, khán giả nên có mặt trước 15 phút."
+  },
+  {
+    "id": 3,
+    "title": "Workshop: Nhiếp ảnh đường phố cùng máy ảnh điện thoại",
+    "slug": "workshop-nhiep-anh-duong-pho",
+    "category": "workshop",
+    "venue": "Nhà hát Bến Thành",
+    "city": "TP. Hồ Chí Minh",
+    "startAt": "2026-12-12T09:00:00+07:00",
+    "priceFrom": 450000,
+    "coverImageUrl": "https://picsum.photos/seed/photo/1200/700",
+    "tags": ["workshop", "nhiếp ảnh", "sáng tạo", "tp hồ chí minh", "học tập"],
+    "popularity": 64,
+    "description": "Buổi workshop kéo dài 3 giờ, hướng dẫn chụp ảnh đường phố bằng điện thoại: bố cục, ánh sáng tự nhiên, cách tiếp cận nhân vật và đạo đức khi chụp ảnh người lạ. Học viên thực hành theo nhóm tại khu vực chợ Bến Thành và phố đi bộ Nguyễn Huệ. Học viên cần mang theo điện thoại còn pin và giày thoải mái. Số lượng giới hạn 30 người để đảm bảo chất lượng hướng dẫn. Vé học viên 450.000 đồng, mỗi đơn tối đa 2 vé. Thời gian bắt đầu 09:00 ngày 12/12/2026, địa điểm tập trung tại Nhà hát Bến Thành, quận 1. Workshop phù hợp với người mới bắt đầu, không yêu cầu máy ảnh chuyên nghiệp."
+  },
+  {
+    "id": 4,
+    "title": "Giải chạy đêm Sài Gòn 2026 — 5km và 10km",
+    "slug": "giai-chay-dem-sai-gon-2026",
+    "category": "sport",
+    "venue": "Công viên Ánh Sáng",
+    "city": "TP. Hồ Chí Minh",
+    "startAt": "2027-01-10T18:00:00+07:00",
+    "priceFrom": 250000,
+    "coverImageUrl": "https://picsum.photos/seed/run/1200/700",
+    "tags": ["chạy bộ", "thể thao", "sài gòn", "sức khỏe", "ngoài trời"],
+    "popularity": 77,
+    "description": "Giải chạy đêm với hai cự ly 5km và 10km, đường chạy ven sông qua các cây cầu nổi tiếng của thành phố. Ban tổ chức bố trí nước uống, y tế và ánh sáng dọc đường chạy. Người hoàn thành nhận huy chương và áo thi đấu. Thời gian xuất phát lúc 18h, đóng cổng xuất phát sau 15 phút. Vận động viên cần có giấy xác nhận sức khoẻ nếu trên 60 tuổi. Vé 5km giá 250.000 đồng, vé 10km giá 350.000 đồng, mỗi đơn tối đa 4 vé. Địa điểm tại Công viên Ánh Sáng, khu đô thị Phú Mỹ Hưng, quận 7, TP. Hồ Chí Minh. Giải diễn ra ngày 10/01/2027."
+  }
+]

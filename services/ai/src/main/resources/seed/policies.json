@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "slug": "chinh-sach-hoan-huy",
+    "title": "Chính sách hoàn và hủy vé, tour",
+    "tags": ["hoàn tiền", "hủy vé", "hủy tour", "chính sách", "hoàn hủy", "trước ngày khởi hành"],
+    "content": "Chính sách hoàn và hủy áp dụng cho đơn đặt vé sự kiện và tour du lịch trên TicketGo.\n\nĐối với tour du lịch:\n- Hủy trước ngày khởi hành từ 7 ngày trở lên: hoàn 100% giá trị tour, trừ phí giao dịch 50.000 đồng.\n- Hủy trước ngày khởi hành từ 3 đến 6 ngày: hoàn 50% giá trị tour.\n- Hủy trước ngày khởi hành dưới 72 giờ: không hoàn tiền.\n- Trường hợp công ty hủy tour do thời tiết hoặc không đủ số khách: hoàn 100%, khách có thể chuyển sang lịch khởi hành khác.\n\nĐối với vé sự kiện:\n- Vé đã thanh toán không được hoàn tiền nếu khách tự hủy, trừ khi ban tổ chức hủy hoặc dời sự kiện.\n- Nếu sự kiện bị hủy bởi ban tổ chức, khách được hoàn 100% trong 7 đến 10 ngày làm việc.\n- Vé có thể được chuyển nhượng một lần nếu ban tổ chức cho phép; người nhận phải xuất trình mã QR hợp lệ.\n\nThời gian xử lý hoàn tiền: 7 đến 10 ngày làm việc kể từ khi yêu cầu được duyệt. Tiền hoàn về đúng phương thức thanh toán ban đầu. Đơn đang trong thời gian giữ chỗ 10 phút có thể hủy miễn phí trước khi thanh toán."
+  },
+  {
+    "id": 2,
+    "slug": "chinh-sach-thanh-toan",
+    "title": "Phương thức và quy trình thanh toán",
+    "tags": ["thanh toán", "vnpay", "momo", "giữ chỗ", "10 phút", "sandbox", "giao dịch"],
+    "content": "TicketGo hỗ trợ thanh toán qua cổng sandbox VNPay hoặc MoMo trong môi trường demo, không trừ tiền thật.\n\nQuy trình:\n1. Khách chọn vé hoặc tour, hệ thống giữ chỗ trong 10 phút.\n2. Khách nhập mã giảm giá nếu có và xác nhận đặt đơn.\n3. Khách chọn thanh toán; hệ thống tạo giao dịch với mã tham chiếu duy nhất.\n4. Khi cổng trả về thành công, đơn chuyển sang trạng thái CONFIRMED và vé QR được phát hành.\n5. Nếu quá 10 phút mà chưa thanh toán, đơn chuyển sang EXPIRED và chỗ được nhả về kho.\n\nLưu ý:\n- Mỗi giao dịch có mã tham chiếu riêng, xử lý lặp lại (idempotent) để tránh trừ tiền hai lần.\n- Nếu thanh toán lỗi, đơn ở trạng thái PAYMENT_FAILED và chỗ được hoàn lại ngay.\n- Không hỗ trợ thanh toán tiền mặt tại quầy trong phiên bản demo.\n- Hóa đơn điện tử được gửi qua email sau khi đơn CONFIRMED (tính năng đang phát triển)."
+  },
+  {
+    "id": 3,
+    "slug": "chinh-sach-ve-qr",
+    "title": "Quy định sử dụng vé QR và soát vé",
+    "tags": ["vé qr", "soát vé", "check-in", "một lần", "mã qr", "vào cổng"],
+    "content": "Mỗi vé điện tử có một mã QR duy nhất, chỉ sử dụng một lần để vào cổng hoặc lên xe tour.\n\nQuy định:\n- Khách xuất trình mã QR tại quầy soát vé; nhân viên quét mã để xác nhận.\n- Hệ thống ghi nhận thời điểm soát vé. Quét lần thứ hai sẽ báo \"vé đã được sử dụng\".\n- Mã QR không được chia sẻ công khai; nếu lộ mã, khách cần liên hệ hỗ trợ để được cấp lại.\n- Đối với sự kiện, cổng soát vé mở trước giờ bắt đầu 60 phút và đóng sau giờ bắt đầu 15 phút.\n- Đối với tour, khách có mặt tại điểm hẹn trước giờ khởi hành 30 phút; hướng dẫn viên soát vé trước khi lên xe.\n- Vé đã soát không được hoàn tiền, trừ trường hợp ban tổ chức hủy chương trình.\n- Khách có thể xem lại mã QR trong mục \"Vé của tôi\" trên website."
+  },
+  {
+    "id": 4,
+    "slug": "quy-dinh-tre-em-va-hanh-ly",
+    "title": "Quy định trẻ em, hành lý và sức khỏe",
+    "tags": ["trẻ em", "hành lý", "sức khỏe", "tuổi", "tour", "quy định"],
+    "content": "Quy định chung khi tham gia tour và sự kiện:\n- Trẻ em dưới 5 tuổi không phù hợp với tour Hà Giang do đường đèo; trẻ từ 6 tuổi trở lên được tham gia tour Đà Lạt nếu có người lớn đi cùng.\n- Trẻ em dưới 10 tuổi có thể tham gia sự kiện hài kịch nếu có phụ huynh; sự kiện âm nhạc yêu cầu khán giả từ 12 tuổi.\n- Mỗi khách được mang một vali nhỏ tối đa 10kg và một balo cá nhân cho tour 2-4 ngày; hành lý quá cỡ có thể phụ thu.\n- Khách trên 60 tuổi tham gia giải chạy cần có giấy xác nhận sức khỏe.\n- Phụ nữ mang thai nên hỏi bác sĩ trước khi tham gia hoạt động chèo thuyền, lặn ngắm san hô hoặc trekking.\n- Khách có bệnh nền cần thông báo cho hướng dẫn viên trước khi khởi hành."
+  }
+]

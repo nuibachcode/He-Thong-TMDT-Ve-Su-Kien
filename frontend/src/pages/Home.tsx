@@ -1,16 +1,46 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../features/auth/auth-context'
-import { getHealth, getRecommendations } from '../lib/api'
+import { getHealth, getRecommendations, saveInterests } from '../lib/api'
 import { formatCurrency } from '../lib/format'
+
+const INTEREST_OPTIONS = ['âm nhạc', 'biển đảo', 'núi', 'ẩm thực', 'nghỉ dưỡng', 'khám phá', 'gia đình']
+const INTEREST_KEY = 'tmdt_interests'
+
+function readInterests(): string[] {
+  try {
+    const raw = localStorage.getItem(INTEREST_KEY)
+    return raw ? (JSON.parse(raw) as string[]) : []
+  } catch {
+    return []
+  }
+}
 
 export default function Home() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const [interests, setInterests] = useState<string[]>(readInterests)
   const health = useQuery({ queryKey: ['health'], queryFn: getHealth, retry: false })
   const recommendations = useQuery({
-    queryKey: ['recommendations', user?.id ?? 'guest'],
-    queryFn: () => getRecommendations(4),
+    queryKey: ['recommendations', user?.id ?? 'guest', interests.join(',')],
+    queryFn: () => getRecommendations(4, interests),
   })
+  const save = useMutation({
+    mutationFn: saveInterests,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recommendations'] }),
+  })
+
+  const toggleInterest = (value: string) => {
+    const next = interests.includes(value)
+      ? interests.filter((item) => item !== value)
+      : [...interests, value]
+    setInterests(next)
+    localStorage.setItem(INTEREST_KEY, JSON.stringify(next))
+    if (user) {
+      save.mutate(next)
+    }
+  }
 
   return (
     <div>
@@ -52,7 +82,7 @@ export default function Home() {
               {health.isError && (
                 <div className="space-y-1 text-rose-200">
                   <p>✗ Không kết nối được API</p>
-                  <p className="text-xs text-white/60">Chạy: cd backend &amp;&amp; mvn spring-boot:run</p>
+                  <p className="text-xs text-white/60">Chạy: docker compose up -d --build</p>
                 </div>
               )}
               {health.data && (
@@ -76,29 +106,59 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="flex items-end justify-between">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-2xl font-bold text-slate-900">
             {user ? `Gợi ý cho ${user.fullName.split(' ')[0]}` : 'Tour đang được quan tâm'}
           </h2>
-          <Link to="/tours" className="text-sm font-medium text-brand-700 hover:underline">
+          <Link to="/events" className="text-sm font-medium text-brand-700 hover:underline">
             Xem tất cả →
           </Link>
         </div>
 
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-slate-500">Sở thích của bạn:</span>
+          {INTEREST_OPTIONS.map((option) => (
+            <button
+              key={option}
+              onClick={() => toggleInterest(option)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                interests.includes(option)
+                  ? 'border-brand-500 bg-brand-50 text-brand-700'
+                  : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+
         {recommendations.isLoading && <p className="mt-4 text-slate-500">Đang tải gợi ý...</p>}
+        {recommendations.isError && (
+          <p className="mt-4 text-sm text-rose-600">Chưa tải được gợi ý. Kiểm tra AI service đã chạy chưa.</p>
+        )}
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {recommendations.data?.map((tour) => (
+          {recommendations.data?.map((item) => (
             <Link
-              key={tour.id}
-              to={`/tours/${tour.slug}`}
+              key={`${item.type}-${item.id}`}
+              to={item.url}
               className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              <img src={tour.coverImageUrl} alt={tour.title} className="h-32 w-full bg-slate-200 object-cover" loading="lazy" />
+              <div className="relative">
+                <img
+                  src={item.coverImageUrl}
+                  alt={item.title}
+                  className="h-32 w-full bg-slate-200 object-cover"
+                  loading="lazy"
+                />
+                <span className="absolute left-3 top-3 rounded-full bg-slate-900/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                  {item.type === 'EVENT' ? 'Sự kiện' : 'Tour'}
+                </span>
+              </div>
               <div className="p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-brand-600">{tour.destination}</p>
-                <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-slate-900">{tour.title}</h3>
-                <p className="mt-2 text-sm font-bold text-brand-700">{formatCurrency(tour.basePrice)}</p>
-                <p className="mt-1 line-clamp-1 text-xs text-slate-500">{tour.reason}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-brand-600">{item.subtitle}</p>
+                <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm font-bold text-brand-700">{formatCurrency(item.price)}</p>
+                <p className="mt-1 line-clamp-1 text-xs text-slate-500">{item.reason}</p>
               </div>
             </Link>
           ))}

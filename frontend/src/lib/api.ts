@@ -1,6 +1,16 @@
 import axios from 'axios'
 
 export const TOKEN_KEY = 'tmdt_token'
+export const GUEST_KEY = 'tmdt_guest_key'
+
+function guestKey() {
+  let key = localStorage.getItem(GUEST_KEY)
+  if (!key) {
+    key = crypto.randomUUID()
+    localStorage.setItem(GUEST_KEY, key)
+  }
+  return key
+}
 
 export const api = axios.create({
   baseURL: '/api',
@@ -13,6 +23,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  config.headers['X-Guest-Key'] = guestKey()
   return config
 })
 
@@ -118,7 +129,7 @@ export type BookingDetail = BookingSummary & {
 
 export type Ticket = { ticketId: number; itemName: string; quantity: number; qrPngBase64: string }
 
-export type Citation = { sourceType: string; sourceId?: number; title: string; score: number }
+export type Citation = { sourceType: string; sourceId?: number; title: string; url?: string; score: number }
 
 export type ChatAnswer = {
   sessionId: number
@@ -132,14 +143,16 @@ export type ChatAnswer = {
 }
 
 export type Recommendation = {
+  type: 'EVENT' | 'TOUR'
   id: number
   title: string
   slug: string
-  destination: string
-  durationDays: number
-  basePrice: number
+  subtitle: string
+  price: number
   coverImageUrl?: string
   reason: string
+  url: string
+  tags?: string[]
 }
 
 export type OrgStats = {
@@ -235,8 +248,15 @@ export const askAi = (message: string, sessionId?: number) =>
 export const sendFeedback = (messageId: number, rating: number) =>
   unwrap(api.post<ApiEnvelope<string>>('/ai/feedback', { messageId, rating }))
 
-export const getRecommendations = (limit = 4) =>
-  unwrap(api.get<ApiEnvelope<Recommendation[]>>('/ai/recommendations', { params: { limit } }))
+export const getRecommendations = (limit = 4, interests: string[] = []) =>
+  unwrap(
+    api.get<ApiEnvelope<Recommendation[]>>('/ai/recommendations', {
+      params: { limit, interests: interests.length ? interests.join(',') : undefined },
+    }),
+  )
+
+export const saveInterests = (interests: string[]) =>
+  unwrap(api.put<ApiEnvelope<string[]>>('/ai/interests', { interests }))
 
 export const orgStats = () => unwrap(api.get<ApiEnvelope<OrgStats>>('/organizer/stats/overview'))
 export const orgBookings = () => unwrap(api.get<ApiEnvelope<OrgBooking[]>>('/organizer/bookings'))
@@ -274,7 +294,7 @@ export const adminUsers = () => unwrap(api.get<ApiEnvelope<AdminUser[]>>('/admin
 export const adminPending = () => unwrap(api.get<ApiEnvelope<PendingItem[]>>('/admin/pending'))
 export const adminSetContentStatus = (type: string, id: number, status: string) =>
   unwrap(api.patch<ApiEnvelope<string>>(`/admin/content/${type}/${id}/status`, { status }))
-export const adminAiMetrics = () => unwrap(api.get<ApiEnvelope<AiMetrics>>('/admin/ai/metrics'))
+export const adminAiMetrics = () => unwrap(api.get<ApiEnvelope<AiMetrics>>('/ai/metrics'))
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {

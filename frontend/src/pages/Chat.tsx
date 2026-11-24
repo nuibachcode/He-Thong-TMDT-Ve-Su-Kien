@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { askAi, getErrorMessage, sendFeedback } from '../lib/api'
 import type { Citation } from '../lib/api'
 
@@ -87,15 +88,26 @@ export default function Chat() {
 
             {message.citations && message.citations.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
-                {message.citations.map((citation) => (
-                  <span
-                    key={`${citation.sourceType}-${citation.sourceId}-${citation.title}`}
-                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 ring-1 ring-slate-200"
-                    title={`Độ tương đồng ${citation.score}`}
-                  >
-                    {citation.sourceType}: {citation.title}
-                  </span>
-                ))}
+                {message.citations.map((citation) =>
+                  citation.url ? (
+                    <Link
+                      key={`${citation.sourceType}-${citation.sourceId}-${citation.title}`}
+                      to={citation.url}
+                      title={`Độ tương đồng ${citation.score}`}
+                      className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 ring-1 ring-brand-100 hover:bg-brand-100"
+                    >
+                      {citation.sourceType === 'EVENT' ? 'Sự kiện' : citation.sourceType === 'TOUR' ? 'Tour' : 'Nguồn'}: {citation.title} →
+                    </Link>
+                  ) : (
+                    <span
+                      key={`${citation.sourceType}-${citation.sourceId}-${citation.title}`}
+                      className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 ring-1 ring-slate-200"
+                      title={`Độ tương đồng ${citation.score}`}
+                    >
+                      {citation.sourceType}: {citation.title}
+                    </span>
+                  ),
+                )}
               </div>
             )}
 

@@ -11,12 +11,17 @@ backend/data/
 backend/*.log
 backend/mvn-build.log
 backend/mvn-test.log
+**/target/
 
 # ===== Frontend =====
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/*.local
+
+# ===== Services =====
+services/*/data/
+services/*/*.log
 
 # ===== Secrets =====
 .env

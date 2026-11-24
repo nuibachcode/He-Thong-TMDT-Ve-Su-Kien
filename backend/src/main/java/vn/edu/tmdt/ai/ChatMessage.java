@@ -18,9 +18,9 @@ public class ChatMessage {
 
     public Long sessionId;
     public String role;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String content;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String citations;
     public String provider;
     public Integer latencyMs;

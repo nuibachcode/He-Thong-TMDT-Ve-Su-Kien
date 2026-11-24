@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "title": "Tour Đà Lạt 3N2Đ — Săn mây và cà phê giữa núi",
+    "slug": "tour-da-lat-3n2d",
+    "destination": "Đà Lạt",
+    "departureCity": "TP. Hồ Chí Minh",
+    "durationDays": 3,
+    "durationNights": 2,
+    "basePrice": 2890000,
+    "coverImageUrl": "https://picsum.photos/seed/dalat3/1200/700",
+    "tags": ["đà lạt", "núi", "săn mây", "cà phê", "biển mây", "nghỉ dưỡng", "gia đình"],
+    "popularity": 98,
+    "description": "Tour Đà Lạt 3 ngày 2 đêm tập trung vào trung tâm thành phố và vùng ven: Đồi chè Cầu Đất, hồ Tuyền Lâm, chùa Linh Phước, chợ đêm Đà Lạt. Đoàn di chuyển bằng xe giường nằm khởi hành buổi tối từ TP. Hồ Chí Minh, đến Đà Lạt vào sáng sớm ngày thứ hai để kịp săn mây. Khách nghỉ tại khách sạn 3 sao khu vực trung tâm, có ăn sáng. Lịch trình có một buổi tự do để khách tự khám phá quán cà phê hoặc mua đặc sản. Tour phù hợp với nhóm bạn trẻ và gia đình có trẻ trên 6 tuổi. Điểm nhấn của tour là buổi sáng săn mây tại Đồi chè Cầu Đất và trải nghiệm uống cà phê muối tại quán view thung lũng. Ngày thứ ba đoàn ghé chợ đêm mua đặc sản trước khi về lại thành phố. Giá cơ bản 2.890.000 đồng/khách, khởi hành các ngày 05/12/2026 và 19/12/2026. Tour bao gồm xe giường nằm khứ hồi, khách sạn 3 sao 2 đêm phòng đôi, ăn sáng 2 bữa, ăn trưa 2 bữa, vé tham quan và hướng dẫn viên. Không bao gồm chi phí cá nhân, đồ uống ngoài chương trình, phụ thu phòng đơn 600.000 đồng/đêm và bảo hiểm du lịch tự nguyện."
+  },
+  {
+    "id": 2,
+    "title": "Tour Đà Lạt 4N3Đ — Thác Datanla và làng Cù Lần",
+    "slug": "tour-da-lat-4n3d",
+    "destination": "Đà Lạt",
+    "departureCity": "TP. Hồ Chí Minh",
+    "durationDays": 4,
+    "durationNights": 3,
+    "basePrice": 3990000,
+    "coverImageUrl": "https://picsum.photos/seed/dalat4/1200/700",
+    "tags": ["đà lạt", "núi", "thác datanla", "làng cù lần", "trekking", "gia đình", "nghỉ dưỡng"],
+    "popularity": 88,
+    "description": "Tour Đà Lạt 4 ngày 3 đêm có thêm một ngày so với tour 3 ngày 2 đêm, dành cho khách muốn trải nghiệm sâu hơn vùng ven: thác Datanla, làng Cù Lần, hồ Tuyền Lâm và đồi chè. Ngày thứ ba đoàn dành trọn một ngày ở khu vực ngoại ô, tối về trung tâm tự do. Khách nghỉ tại khách sạn 3 sao, có ăn sáng và 3 bữa trưa. Tour phù hợp với gia đình có trẻ nhỏ và người lớn tuổi vì lịch trình nhẹ nhàng hơn, có nhiều thời gian nghỉ. So với tour 3N2Đ, tour 4N3Đ có thêm hoạt động đi bộ trong rừng thông, chèo thuyền tại hồ Tuyền Lâm và một buổi tối giao lưu cồng chiêng. Giá tour cao hơn khoảng 1.100.000 đồng do thêm một đêm khách sạn và một ngày xe. Giá cơ bản 3.990.000 đồng/khách, khởi hành ngày 12/12/2026 và 09/01/2027. Bao gồm xe giường nằm khứ hồi, khách sạn 3 sao 3 đêm, ăn sáng 3 bữa, ăn trưa 3 bữa, vé tham quan, hoạt động theo lịch trình và hướng dẫn viên. Không bao gồm chi phí cá nhân, phụ thu phòng đơn 600.000 đồng/đêm và đồ uống ngoài chương trình."
+  },
+  {
+    "id": 3,
+    "title": "Tour Phú Quốc 4N3Đ — Lặn ngắm san hô",
+    "slug": "tour-phu-quoc-4n3d",
+    "destination": "Phú Quốc",
+    "departureCity": "TP. Hồ Chí Minh",
+    "durationDays": 4,
+    "durationNights": 3,
+    "basePrice": 5490000,
+    "coverImageUrl": "https://picsum.photos/seed/phuquoc/1200/700",
+    "tags": ["phú quốc", "biển đảo", "lặn san hô", "resort", "cáp treo", "gia đình", "cặp đôi"],
+    "popularity": 93,
+    "description": "Tour Phú Quốc 4 ngày 3 đêm kết hợp nghỉ dưỡng và khám phá biển: lặn ngắm san hô tại Hòn Thơm, cáp treo vượt biển dài nhất Việt Nam, làng chài Hàm Ninh và chợ đêm Dinh Cậu. Khách nghỉ tại resort 3 sao sát biển, có bữa sáng buffet. Tour không bao gồm vé máy bay, khách tự túc di chuyển đến Phú Quốc hoặc đăng ký thêm gói vé máy bay của công ty. Thời gian tự do buổi chiều ngày thứ ba để khách tắm biển hoặc nghỉ tại resort. Đây là tour phù hợp với khách thích biển đảo, gia đình và cặp đôi. Hoạt động lặn ngắm san hô có hướng dẫn viên riêng và áo phao, không yêu cầu biết bơi. Giá cơ bản 5.490.000 đồng/khách, khởi hành ngày 18/12/2026 và 15/01/2027. Bao gồm khách sạn 3 sao sát biển 3 đêm, ăn sáng buffet, xe đưa đón sân bay trong đảo, vé cáp treo, tour lặn và hướng dẫn viên. Không bao gồm vé máy bay khứ hồi, bữa trưa, bữa tối và chi phí cá nhân."
+  },
+  {
+    "id": 4,
+    "title": "Tour Hà Giang 3N2Đ — Cung đường đá và hoa tam giác mạch",
+    "slug": "tour-ha-giang-3n2d",
+    "destination": "Hà Giang",
+    "departureCity": "Hà Nội",
+    "durationDays": 3,
+    "durationNights": 2,
+    "basePrice": 2490000,
+    "coverImageUrl": "https://picsum.photos/seed/hagiang/1200/700",
+    "tags": ["hà giang", "núi", "trekking", "mã pí lèng", "hoa tam giác mạch", "khám phá", "chụp ảnh"],
+    "popularity": 85,
+    "description": "Tour Hà Giang 3 ngày 2 đêm theo cung đường Đồng Văn - Mèo Vạc, qua đèo Mã Pí Lèng, sông Nho Quế và cột cờ Lũng Cú. Đoàn di chuyển bằng xe 16 chỗ, nghỉ tại homestay và khách sạn nhỏ tại Đồng Văn. Lịch trình có nhiều đoạn đường đèo, phù hợp với khách thích khám phá và chụp ảnh. Khách cần chuẩn bị áo ấm vì nhiệt độ ban đêm có thể xuống dưới 10 độ vào mùa đông. Tour không phù hợp với trẻ dưới 5 tuổi. Điểm nhấn là chèo thuyền trên sông Nho Quế và ngắm hoa tam giác mạch vào tháng 11, 12. Giá cơ bản 2.490.000 đồng/khách, khởi hành ngày 03/12/2026 và 08/01/2027. Bao gồm xe 16 chỗ khứ hồi từ Hà Nội, homestay 2 đêm, ăn sáng 2 bữa, ăn tối 2 bữa, thuyền sông Nho Quế và hướng dẫn viên. Không bao gồm chi phí cá nhân, bữa trưa và phụ thu phòng đơn."
+  },
+  {
+    "id": 5,
+    "title": "Tour Hội An 2N1Đ — Phố cổ và rừng dừa Bảy Mẫu",
+    "slug": "tour-hoi-an-2n1d",
+    "destination": "Hội An",
+    "departureCity": "Đà Nẵng",
+    "durationDays": 2,
+    "durationNights": 1,
+    "basePrice": 1690000,
+    "coverImageUrl": "https://picsum.photos/seed/hoian/1200/700",
+    "tags": ["hội an", "phố cổ", "ẩm thực", "đèn hoa đăng", "miền trung", "cuối tuần", "cặp đôi"],
+    "popularity": 90,
+    "description": "Tour Hội An 2 ngày 1 đêm dành cho khách muốn nghỉ ngắn cuối tuần: dạo phố cổ, thả đèn hoa đăng trên sông Hoài, đi thuyền thúng tại rừng dừa Bảy Mẫu. Khách nghỉ tại khách sạn 3 sao cách phố cổ 500 mét, có ăn sáng. Tour khởi hành từ Đà Nẵng, phù hợp với khách đã có vé máy bay. Thời gian tự do buổi chiều ngày thứ hai để mua sắm hoặc nghỉ ngơi trước khi về. Điểm nhấn là buổi tối thả đèn hoa đăng và ẩm thực đường phố Hội An: cao lầu, cơm gà, bánh mì Phượng. Giá cơ bản 1.690.000 đồng/khách, khởi hành ngày 06/12/2026 và 27/12/2026. Bao gồm khách sạn 3 sao 1 đêm, ăn sáng, xe đưa đón từ Đà Nẵng, vé tham quan phố cổ, thuyền thúng rừng dừa và hướng dẫn viên. Không bao gồm vé máy bay, bữa trưa, bữa tối và chi phí cá nhân."
+  }
+]

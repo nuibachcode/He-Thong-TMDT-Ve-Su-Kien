@@ -1,0 +1,31 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    vn.edu.tmdt: INFO
+    org.springframework.cloud.gateway: INFO
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-key-change-me-please-32bytes-min}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173}
+  services:
+    core-uri: ${CORE_API_URL:http://localhost:8081}
+    ai-uri: ${AI_SERVICE_URL:http://localhost:8082}

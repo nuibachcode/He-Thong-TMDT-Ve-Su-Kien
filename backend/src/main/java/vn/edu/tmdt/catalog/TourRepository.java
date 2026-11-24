@@ -17,8 +17,9 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     @Query("""
             select t from Tour t
             where t.status = 'PUBLISHED'
-              and (:q is null or lower(t.title) like lower(concat('%', :q, '%')))
-              and (:destination is null or lower(t.destination) like lower(concat('%', :destination, '%')))
+              and (cast(:q as string) is null or lower(t.title) like lower(concat('%', cast(:q as string), '%')))
+              and (cast(:destination as string) is null
+                   or lower(t.destination) like lower(concat('%', cast(:destination as string), '%')))
             order by t.createdAt desc
             """)
     List<Tour> search(@Param("q") String q, @Param("destination") String destination);

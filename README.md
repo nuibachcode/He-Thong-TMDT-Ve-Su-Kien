@@ -1,34 +1,47 @@
 # TicketGo — Hệ thống TMDT vé sự kiện & tour du lịch tích hợp AI/RAG
 
-> Đồ án cuối học phần · Nhóm 3 người · **4 tuần**
-> Java 25 · Spring Boot 4.2 · React 19 · Vite 8 · Tailwind 4 · MySQL 8 / H2 · RAG tự viết
+> Kiến trúc microservices theo báo cáo Nhóm 11 · **Chạy toàn hệ thống bằng Docker Compose**
+> Spring Boot 3.5 WebFlux · API Gateway · PostgreSQL + pgvector · MongoDB · Redis · RabbitMQ · React 19 + Vite
 
-Bộ khung + nghiệp vụ đã được build và kiểm thử thật trên máy của bạn: đăng nhập JWT, danh mục sự kiện/tour,
-đặt vé giữ chỗ + thanh toán mô phỏng + QR, chat RAG có trích nguồn và từ chối ngoài phạm vi, dashboard organizer,
-quản trị duyệt nội dung và số liệu AI.
+## 1. Chạy trong một lệnh
 
----
-
-## 1. Chạy trong 5 phút
-
-Mở **2 terminal** tại thư mục gốc dự án.
+Yêu cầu: **Docker Desktop** đang chạy.
 
 ```powershell
-# Terminal 1 — Backend (cổng 8080)
-cd backend
-mvn spring-boot:run
+# (tuỳ chọn) tạo file cấu hình riêng
+Copy-Item .env.example .env
+
+# build và chạy toàn bộ hệ thống
+docker compose up -d --build
 ```
+
+Mở:
+
+| Thành phần | URL |
+|---|---|
+| Ứng dụng (frontend) | http://localhost:5173 |
+| API Gateway | http://localhost:8080 |
+| AI service (debug) | http://localhost:8082 |
+| RabbitMQ Management | http://localhost:15672 (`tmdt` / `tmdt123`) |
+| PostgreSQL | `localhost:5432` (db `core_db`, `ai_db`) |
+| MongoDB | `localhost:27017` (db `ai`) |
+| Redis | `localhost:6379` |
+
+Kiểm tra nhanh:
 
 ```powershell
-# Terminal 2 — Frontend (cổng 5173)
-cd frontend
-npm install     # chỉ lần đầu
-npm run dev
+Invoke-RestMethod http://localhost:8080/api/health        # core-api qua gateway
+Invoke-RestMethod http://localhost:8080/api/ai/health     # AI service
 ```
 
-Mở http://localhost:5173 → trang chủ hiển thị trạng thái `✓ status: UP` nghĩa là FE đã nói chuyện được với BE.
+Dừng / xoá dữ liệu:
 
-**Tài khoản demo** (tự tạo khi backend khởi động lần đầu):
+```powershell
+docker compose down          # dừng, giữ dữ liệu
+docker compose down -v       # dừng và xoá volume (reset DB)
+```
+
+**Tài khoản demo**
 
 | Email | Mật khẩu | Vai trò |
 |---|---|---|
@@ -36,111 +49,153 @@ Mở http://localhost:5173 → trang chủ hiển thị trạng thái `✓ statu
 | `organizer@demo.vn` | `Org@12345` | ORGANIZER |
 | `admin@demo.vn` | `Admin@123` | ADMIN |
 
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- H2 Console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:file:./data/devdb`, user `sa`, mật khẩu rỗng)
+Voucher demo: `WELCOME10` (giảm 10%, tối đa 300k), `TOUR500` (giảm 500k cho tour),
+`HETHONG` (mã hết hạn — dùng để demo lỗi).
 
-## 2. Cấu trúc
+## 2. Kiến trúc
 
 ```
-.
-├── backend/                 # Spring Boot 4.2 (JDK 25)
-│   ├── pom.xml
-│   └── src/main/java/vn/edu/tmdt/
-│       ├── auth/            # User, JWT, đăng ký/đăng nhập  ← đã xong
-│       ├── config/          # Security, OpenAPI, seeder tài khoản demo
-│       ├── common/          # ApiResponse, xử lý lỗi tập trung
-│       └── web/             # /api/health
-├── frontend/                # React + TS + Vite + Tailwind 4
-│   └── src/
-│       ├── lib/api.ts       # axios client + kiểu dữ liệu + xử lý lỗi
-│       ├── features/auth/   # AuthContext (token, user, login/logout)
-│       ├── components/      # Layout, header/footer
-│       └── pages/           # Home, Login, Register, NotFound
-├── docs/                    # 8 tài liệu kế hoạch (đọc từ 01 → 08)
-├── database/schema.sql      # DDL MySQL 16 bảng
-├── docker-compose.yml       # MySQL 8.4 + Adminer (tuỳ chọn)
-├── .env.example             # mẫu biến môi trường
-└── README.md
+React + Vite (nginx) ──/api──▶ API Gateway :8080
+                                  │ JWT + CORS + định tuyến
+                  ┌───────────────┴────────────────┐
+             /api/ai/**                      các /api/** khác
+                  │                                │
+            AI Service :8082                core-api :8081
+        RAG + recommendation            Identity/Catalog/Inventory/
+        pgvector · MongoDB ·            Order/Payment (composite,
+        Redis · RabbitMQ                đang tách dần)
 ```
 
-## 3. Tài liệu dự án — đọc theo thứ tự
+Chi tiết: [docs/09-kien-truc-microservices.md](docs/09-kien-truc-microservices.md).
 
-| # | Tài liệu | Nội dung |
+| Thành phần | Vai trò | Công nghệ |
 |---|---|---|
-| 01 | [Tổng quan](docs/01-tong-quan.md) | Bài toán, mục tiêu, phạm vi must/should/cut, 3 tính năng AI |
-| 02 | [Kiến trúc](docs/02-kien-truc.md) | Sơ đồ hệ thống, stack, luồng đặt vé, luồng RAG, lớp AI |
-| 03 | [Cơ sở dữ liệu](docs/03-co-so-du-lieu.md) | ERD, DDL, dữ liệu mẫu, query quan trọng |
-| 04 | [API](docs/04-api.md) | Hợp đồng API cho cả nhóm code song song |
-| 05 | [Kế hoạch 4 tuần](docs/05-ke-hoach-4-tuan.md) | Phân công từng ngày cho 3 người, mốc M1–M4 |
-| 06 | [Demo & bảo vệ](docs/06-demo-va-bao-ve.md) | Kịch bản 12 phút, 20 câu phản biện, dàn ý báo cáo/slide |
-| 07 | [Rủi ro](docs/07-rui-ro.md) | Bảng rủi ro, thang cắt scope, bẫy kỹ thuật đã gặp |
-| 08 | [RAG Playbook](docs/08-rag-playbook.md) | Công thức + code mẫu triển khai RAG |
+| `services/gateway` | Định tuyến, xác thực JWT, CORS, phân quyền thô | Spring Cloud Gateway (WebFlux) |
+| `services/ai` | Chat RAG, embedding, gợi ý, feedback, metrics | Spring Boot 3.5 WebFlux, R2DBC, Mongo, Redis, AMQP |
+| `backend` (core-api) | Nghiệp vụ mua vé, catalog, organizer, admin | Spring Boot, JPA, PostgreSQL |
+| `frontend` | Giao diện người dùng + chat + gợi ý | React 19, Vite, TypeScript, Tailwind |
+| `infra/postgres/init.sql` | Tạo `core_db`, `ai_db`, extension pgvector | PostgreSQL 16 |
 
-## 4. Chạy với MySQL (tuỳ chọn)
+`core-api` là composite service tạm thời để demo end-to-end; khi tách Identity/Catalog/Inventory/Order/Payment
+thành service riêng, chỉ cần thêm route trong gateway.
 
-Mặc định dùng H2 file (không cần Docker). Khi cần giống production:
+## 3. AI/RAG
+
+- Dữ liệu mẫu: 4 sự kiện, 5 tour, 4 tài liệu chính sách (hoàn/hủy, thanh toán, vé QR, trẻ em/hành lý).
+- Pipeline: ingest → chunk 1.400 ký tự → embedding → pgvector top-k → prompt + guardrail → trả lời kèm citation.
+- `AI_PROVIDER=mock` (mặc định): embedding lexical + trả lời trích xuất, **không cần Internet/quota**.
+- `AI_PROVIDER=gemini` + `GEMINI_API_KEY=...`: dùng `gemini-embedding-001` (768 chiều) và `gemini-2.5-flash`.
+- Citation có `url` để frontend mở thẳng trang sự kiện/tour.
+- Redis cache embedding + câu trả lời; rate limit 20 tin/phút; guardrail từ chối câu ngoài phạm vi.
+- Gợi ý theo sở thích đã lưu (`PUT /api/ai/interests`) hoặc độ phổ biến.
+
+Endpoint chính:
+
+| Method | Path | Ghi chú |
+|---|---|---|
+| POST | `/api/ai/chat` | `{sessionId?, message}` |
+| GET | `/api/ai/recommendations?limit&interests` | trộn sự kiện + tour |
+| GET/PUT | `/api/ai/interests` | cần đăng nhập |
+| POST | `/api/ai/feedback` | `{messageId, rating}` |
+| POST | `/api/ai/reindex` | ADMIN |
+| GET | `/api/ai/metrics` | ADMIN |
+| GET | `/api/ai/health` | trạng thái + provider + số chunk |
+
+Ví dụ câu hỏi demo:
+
+- “Huỷ tour trước 5 ngày có được hoàn tiền không?”
+- “Tour Phú Quốc có bao gồm vé máy bay không?”
+- “Tour Đà Lạt 3 ngày và 4 ngày khác nhau thế nào?”
+- “Hôm nay thời tiết Hà Nội thế nào?” → phải từ chối.
+
+Bật Gemini:
 
 ```powershell
-docker compose up -d          # MySQL 8.4 :3306, Adminer :8081
-$env:SPRING_PROFILES_ACTIVE = 'mysql'
-cd backend; mvn spring-boot:run
-```
-
-Adminer: http://localhost:8081 — server `mysql`, user `tmdt`, mật khẩu `tmdt123`, database `tmdt`.
-
-> Nếu Docker Desktop chưa chạy, cứ dùng H2. Đừng để việc cài Docker chặn tiến độ tuần 1.
-
-## 5. Cấu hình AI (làm ở tuần 2)
-
-Sao chép `.env.example` → `.env` ở thư mục gốc rồi điền. Backend tự đọc `.env` (đã cấu hình `spring.config.import`).
-
-```env
-AI_PROVIDER=mock          # mock | gemini | groq
+# sửa .env
+AI_PROVIDER=gemini
 GEMINI_API_KEY=...
-GROQ_API_KEY=...
+docker compose up -d --build ai-service
 ```
 
-- `mock`: chạy offline, không tốn quota — **dùng khi dev và khi demo dự phòng**.
-- `gemini`: chat + embedding (khuyến nghị cho RAG).
-- `groq`: chat nhanh, không có embedding.
+## 4. Luồng demo 12 phút
 
-Lấy key free: [Google AI Studio](https://aistudio.google.com/) · [Groq Console](https://console.groq.com/).
+1. Trang chủ → chọn sở thích → khu gợi ý đổi theo sở thích.
+2. Xem sự kiện/tour → chọn hạng vé/lịch → áp voucher → đặt đơn (giữ chỗ 10 phút).
+3. Thanh toán mô phỏng → “Vé của tôi” → xem QR.
+4. Chat AI: câu hỏi chéo dữ liệu + câu ngoài phạm vi → xem citation mở đúng sự kiện/tour.
+5. Organizer: tạo sự kiện/tour, xem doanh thu, dùng AI viết mô tả.
+6. Admin: duyệt nội dung, khoá user, xem metrics AI.
+7. Kỹ thuật: chứng minh chống oversell, rate limit AI, reindex.
 
-## 6. Lệnh hữu ích
+## 5. Lệnh hữu ích
 
 | Việc | Lệnh |
 |---|---|
-| Chạy test backend | `cd backend; mvn test` |
-| Build jar | `cd backend; mvn -DskipTests package` |
+| Xem log | `docker compose logs -f` |
+| Log một service | `docker compose logs -f ai-service` |
+| Rebuild service | `docker compose up -d --build ai-service` |
+| Test core | `cd backend; mvn test` |
+| Build gateway/AI | `cd services/gateway; mvn -DskipTests package` |
 | Build frontend | `cd frontend; npm run build` |
-| Xem bản build tĩnh (có proxy API) | `cd frontend; npm run preview` → :4173 |
 | Kiểm tra compose | `docker compose config --quiet` |
-| Reset DB dev (H2) | xoá thư mục `backend/data` rồi chạy lại |
+| Reindex AI | đăng nhập admin → `POST /api/ai/reindex` hoặc gửi message RabbitMQ `catalog.changed` |
 
-## 7. Ghi chú kỹ thuật (đã kiểm chứng)
+## 6. Biến môi trường
 
-- **Spring Boot 4 dùng Jackson 3** (`tools.jackson.*`). Không import `com.fasterxml.jackson.databind` — sẽ lỗi biên dịch.
-- Thuộc tính `spring.jackson.serialization.write-dates-as-timestamps` **không còn tồn tại**; Jackson 3 mặc định ISO-8601.
-- Không dùng Lombok trong bộ khung để tránh rủi ro annotation processor với JDK 25. Muốn thêm thì build ngay.
-- Frontend dev/preview đều proxy `/api` → `http://localhost:8080`, không cần cấu hình CORS khi dev.
-- Token JWT lưu `localStorage` (đơn giản cho đồ án). Hướng cải tiến: httpOnly cookie + refresh token — ghi vào phần hạn chế của báo cáo.
-- H2 file mode đã bật `AUTO_SERVER=TRUE` để tránh khoá file khi mở console.
+Xem [.env.example](.env.example). Quan trọng:
 
-## 8. Tính năng đã có
-
-| Nhóm | Đã triển khai |
+| Biến | Ý nghĩa |
 |---|---|
-| Auth | Đăng ký, đăng nhập JWT, phân quyền CUSTOMER/ORGANIZER/ADMIN |
-| Danh mục | 4 sự kiện + 5 tour mẫu, lọc/tìm kiếm, chi tiết kèm loại vé/lịch khởi hành |
-| Đặt vé | Giữ chỗ 10 phút, atomic update chống oversell, voucher, job nhả vé hết hạn |
-| Thanh toán | Cổng mô phỏng, xác nhận đơn idempotent, vé điện tử QR (ZXing) |
-| AI/RAG | Ingest → chunk → embedding → top-k → prompt → trả lời + citation, guardrail từ chối, chế độ mock/lexical khi không có key, feedback 👍/👎 |
-| Cá nhân hoá | Gợi ý tour theo sở thích (vector + luật), fallback "đang được quan tâm" |
-| Organizer | Dashboard doanh thu/tỷ lệ lấp đầy, danh sách đơn, tạo sự kiện/tour, AI viết mô tả, soát vé QR |
-| Admin | Thống kê, duyệt/từ chối nội dung, khoá người dùng, số liệu chất lượng AI |
+| `JWT_SECRET` | Bắt buộc ≥ 32 ký tự, dùng chung gateway/core/AI |
+| `POSTGRES_*` | Tài khoản PostgreSQL |
+| `AI_PROVIDER` | `mock` hoặc `gemini` |
+| `GEMINI_API_KEY` | Key Gemini (không commit) |
+| `CORS_ORIGINS` | Origin frontend được phép |
+| `GATEWAY_PORT`, `FRONTEND_PORT` | Đổi cổng host nếu trùng |
 
-## 9. Bước tiếp theo
+## 7. Chạy dev không Docker (tuỳ chọn)
 
-1. Chạy thử toàn bộ luồng theo `docs/06-demo-va-bao-ve.md` (mua vé → QR → chat → organizer → admin).
-2. Điền `GEMINI_API_KEY` vào `.env` rồi đặt `AI_PROVIDER=gemini` để so sánh chất lượng RAG với chế độ mock (ghi số liệu vào báo cáo).
-3. Bổ sung theo thứ tự ưu tiên trong `docs/05-ke-hoach-4-tuan.md` nếu còn thời gian: review, check-in, email, deploy Docker.
+Vẫn có thể chạy nhanh core-api với H2 như bản cũ, nhưng **khuyến nghị Docker** để đúng kiến trúc:
+
+```powershell
+# hạ tầng
+docker compose up -d postgres mongo redis rabbitmq
+
+# core-api (H2 hoặc postgres profile)
+cd backend; mvn spring-boot:run
+
+# AI service
+cd services/ai; mvn spring-boot:run
+
+# gateway
+cd services/gateway; mvn spring-boot:run
+
+# frontend
+cd frontend; npm install; npm run dev
+```
+
+## 8. Trạng thái và việc tiếp theo
+
+Đã có:
+
+- Hạ tầng Docker Compose (PostgreSQL/pgvector, MongoDB, Redis, RabbitMQ) + healthcheck.
+- API Gateway JWT/CORS/định tuyến, chống giả mạo header.
+- AI service WebFlux: RAG, citation có link, gợi ý theo sở thích, cache, rate limit, reindex, metrics.
+- Frontend chat + khu gợi ý + Docker/nginx.
+- core-api chạy PostgreSQL trong Docker, giữ nguyên luồng mua vé/QR/organizer/admin.
+
+Tiếp theo (đúng báo cáo):
+
+- Tách core-api thành Identity (PostgreSQL), Catalog (MongoDB), Inventory (PostgreSQL + Redis),
+  Order (PostgreSQL), Payment (PostgreSQL).
+- Adapter thanh toán VNPay/MoMo sandbox + callback.
+- Saga đầy đủ qua RabbitMQ (command/reply, compensation).
+- Bổ sung test tranh vé đồng thời và bộ 20 câu vàng cho RAG.
+
+## 9. Ghi chú kỹ thuật
+
+- Gateway/AI dùng Java 21, Spring Boot 3.5; core giữ Spring Boot 4 nhưng build target Java 21.
+- PostgreSQL dùng `pgvector/pgvector:pg16`; extension `vector` tạo trong `ai_db`.
+- R2DBC không bind trực tiếp kiểu `vector`; repository dựng literal số từ embedding (an toàn, không chứa input người dùng).
+- Header `X-User-*` chỉ do gateway gắn sau khi xác thực; client gửi lên sẽ bị xoá.
+- Guest chat dùng `X-Guest-Key` (UUID lưu localStorage) để giữ phiên và rate limit.

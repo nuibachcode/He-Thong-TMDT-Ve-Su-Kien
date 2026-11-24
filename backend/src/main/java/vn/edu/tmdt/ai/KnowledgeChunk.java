@@ -20,10 +20,10 @@ public class KnowledgeChunk {
     public Long sourceId;
     public String title;
     public Integer chunkIndex;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String content;
     public String contentHash;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String embedding;
     public String embeddingModel;
     public Integer embeddingDim;

@@ -1,40 +1,180 @@
+name: ticketgo
+
+# ============================================================
+# TicketGo - ha tang microservices
+# Chay: docker compose up -d --build
+# Xem log: docker compose logs -f
+# Dung: docker compose down
+# ============================================================
+
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: tmdt-mysql
-    restart: unless-stopped
+  # ---------- Ha tang du lieu ----------
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ticketgo-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: tmdt
-      MYSQL_USER: tmdt
-      MYSQL_PASSWORD: tmdt123
-      TZ: Asia/Ho_Chi_Minh
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
+      POSTGRES_USER: ${POSTGRES_USER:-tmdt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      POSTGRES_DB: ${POSTGRES_DB:-ticketgo}
     ports:
-      - "3306:3306"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot123"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tmdt} -d ${POSTGRES_DB:-ticketgo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [ticketgo]
+
+  mongo:
+    image: mongo:7
+    container_name: ticketgo-mongo
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
-      retries: 12
-      start_period: 20s
+      retries: 20
+    networks: [ticketgo]
 
-  adminer:
-    image: adminer:latest
-    container_name: tmdt-adminer
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
+  redis:
+    image: redis:7-alpine
+    container_name: ticketgo-redis
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "8081:8080"
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [ticketgo]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ticketgo-rabbitmq
     environment:
-      ADMINER_DEFAULT_SERVER: mysql
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-tmdt}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-tmdt123}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks: [ticketgo]
+
+  # ---------- Ung dung ----------
+  # core-api: composite service tam thoi cho Identity/Catalog/Inventory/Order/Payment
+  # (se duoc tach dan thanh microservice; xem docs/09-kien-truc-microservices.md)
+  core-api:
+    build:
+      context: ./backend
+    container_name: ticketgo-core-api
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8081
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${CORE_DB:-core_db}
+      DB_USER: ${POSTGRES_USER:-tmdt}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${CORE_API_PORT:-8081}:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [ticketgo]
+
+  # ai-service: RAG + recommendation (Nui) - WebFlux, pgvector, MongoDB, Redis, RabbitMQ
+  ai-service:
+    build:
+      context: ./services/ai
+    container_name: ticketgo-ai-service
+    environment:
+      SERVER_PORT: 8082
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      AI_DB: ${AI_DB:-ai_db}
+      POSTGRES_USER: ${POSTGRES_USER:-tmdt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tmdt123}
+      MONGO_URI: mongodb://mongo:27017/${MONGO_DB:-ai}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-tmdt}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-tmdt123}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-2.5-flash}
+      GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL:-gemini-embedding-001}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-768}
+      AI_REINDEX_ON_START: ${AI_REINDEX_ON_START:-false}
+      AI_CACHE_ENABLED: ${AI_CACHE_ENABLED:-true}
+      AI_RATE_LIMIT_ENABLED: ${AI_RATE_LIMIT_ENABLED:-true}
+      AI_RATE_LIMIT_PER_MINUTE: ${AI_RATE_LIMIT_PER_MINUTE:-20}
+    ports:
+      - "${AI_SERVICE_PORT:-8082}:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [ticketgo]
+
+  # gateway: cua ngo duy nhat cho frontend, xac thuc JWT + CORS + dinh tuyen
+  gateway:
+    build:
+      context: ./services/gateway
+    container_name: ticketgo-gateway
+    environment:
+      SERVER_PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-key-change-me-please-32bytes-min}
+      CORE_API_URL: http://core-api:8081
+      AI_SERVICE_URL: http://ai-service:8082
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      - core-api
+      - ai-service
+    networks: [ticketgo]
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ticketgo-frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - gateway
+    networks: [ticketgo]
+
+networks:
+  ticketgo:
+    driver: bridge
 
 volumes:
-  mysql-data:
+  pgdata:
+  mongodata:
+  redisdata:
+  rabbitmqdata:

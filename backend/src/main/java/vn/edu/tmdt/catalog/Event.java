@@ -21,7 +21,7 @@ public class Event {
     public String title;
     @Column(unique = true)
     public String slug;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String description;
     public String category;
     public String coverImageUrl;

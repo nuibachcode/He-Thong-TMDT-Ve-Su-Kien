@@ -1,0 +1,62 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: ai-service
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${AI_DB:ai_db}
+    username: ${POSTGRES_USER:tmdt}
+    password: ${POSTGRES_PASSWORD:tmdt123}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/ai}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        auto-startup: true
+        default-requeue-rejected: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+ai:
+  provider: ${AI_PROVIDER:mock}
+  embedding-dimension: ${AI_EMBEDDING_DIMENSION:768}
+  reindex-on-start: ${AI_REINDEX_ON_START:false}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    chat-model: ${GEMINI_CHAT_MODEL:gemini-2.5-flash}
+    embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+  rag:
+    top-k: 5
+    gemini-threshold: 0.55
+    lexical-threshold: 0.12
+    max-output-tokens: 800
+  cache:
+    enabled: ${AI_CACHE_ENABLED:true}
+    ttl-seconds: 900
+  rate-limit:
+    enabled: ${AI_RATE_LIMIT_ENABLED:true}
+    per-minute: ${AI_RATE_LIMIT_PER_MINUTE:20}
+
+logging:
+  level:
+    vn.edu.tmdt: INFO

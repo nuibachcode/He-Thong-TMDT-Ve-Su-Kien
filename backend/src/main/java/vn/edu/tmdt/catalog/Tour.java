@@ -21,7 +21,7 @@ public class Tour {
     public String title;
     @Column(unique = true)
     public String slug;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String description;
     public String destination;
     public String departureCity;
@@ -30,11 +30,11 @@ public class Tour {
     @Column(precision = 12, scale = 2)
     public BigDecimal basePrice;
     public String coverImageUrl;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String highlights;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String included;
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     public String excluded;
     public String status = "PUBLISHED";
     public Instant createdAt = Instant.now();

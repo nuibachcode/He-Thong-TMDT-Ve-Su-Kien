@@ -1,5 +1,8 @@
 # 02 — Kiến trúc hệ thống
 
+> ⚠️ **Bản cũ (monolith).** Kiến trúc đang chạy bằng Docker của dự án nằm ở
+> [`09-kien-truc-microservices.md`](09-kien-truc-microservices.md). Tài liệu này giữ lại để tham khảo lịch sử.
+
 > Mục tiêu: cả nhóm hình dung được **hệ thống gồm những khối nào, nói chuyện với nhau ra sao**, và biết chính xác mỗi người code ở đâu.
 
 ---
