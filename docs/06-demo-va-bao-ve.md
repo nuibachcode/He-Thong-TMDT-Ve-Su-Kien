@@ -1,5 +1,8 @@
 # 06 — Kịch bản demo & bảo vệ
 
+> ⚠️ **Tài liệu lịch sử (monolith).** Kịch bản demo bản Docker/microservices nằm ở
+> [`11-kich-ban-demo.md`](11-kich-ban-demo.md).
+
 > Mục tiêu: 12 phút demo **không sửa code**, mỗi thành viên nói đúng phần mình, và trả lời được mọi câu hỏi về kiến trúc.
 
 ---

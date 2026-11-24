@@ -1,5 +1,8 @@
 # 05 — Kế hoạch 4 tuần cho nhóm 3 người
 
+> ⚠️ **Tài liệu lịch sử.** Bản hiện tại là dự án Docker/microservices của Núi; xem
+> [`09-kien-truc-microservices.md`](09-kien-truc-microservices.md) và [`11-kich-ban-demo.md`](11-kich-ban-demo.md).
+
 > Mốc tham chiếu: **23/11/2026 → 18/12/2026** (20 ngày làm việc). Nếu hạn nộp của bạn khác, giữ nguyên thứ tự công việc và dịch ngày.
 > Ngân sách: **60 người-ngày**. Mỗi ngày mỗi người chỉ nên có **1 việc chính** + việc phụ.
 
