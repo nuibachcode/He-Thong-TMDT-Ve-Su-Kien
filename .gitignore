@@ -1,0 +1,28 @@
+# ===== IDE / OS =====
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ===== Backend =====
+backend/target/
+backend/data/
+backend/*.log
+backend/mvn-build.log
+backend/mvn-test.log
+
+# ===== Frontend =====
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.local
+
+# ===== Secrets =====
+.env
+.env.*
+!.env.example
+*.pem
+
+# ===== Khac =====
+*.log

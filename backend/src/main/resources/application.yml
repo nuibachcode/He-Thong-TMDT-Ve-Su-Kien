@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ticket-tour-api
+  config:
+    # Doc them file .env o thu muc goc repo (neu co). File khong ton tai thi bo qua.
+    import: optional:file:../.env[.properties],optional:file:.env[.properties]
+  profiles:
+    # Doi sang "mysql" khi da chay docker compose (xem README)
+    default: h2
+  datasource:
+    url: jdbc:h2:file:./data/devdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jackson:
+    # Jackson 3 (Spring Boot 4) mac dinh ghi ngay theo ISO-8601, khong can cau hinh them
+    default-property-inclusion: non_null
+
+app:
+  jwt:
+    # Bat buoc >= 32 ky tu. Tren production: dat bien moi truong JWT_SECRET
+    secret: ${JWT_SECRET:dev-only-secret-key-change-me-please-32bytes-min}
+    expiration-seconds: 86400
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+
+# Khung cau hinh AI - nguoi C se dung khi lam RAG (xem docs/08-rag-playbook.md)
+ai:
+  provider: ${AI_PROVIDER:mock}          # mock | gemini | groq
+  embedding-dimension: 768
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    chat-model: ${GEMINI_MODEL:gemini-2.5-flash}
+    embedding-model: ${GEMINI_EMBEDDING_MODEL:gemini-embedding-001}
+  groq:
+    api-key: ${GROQ_API_KEY:}
+    chat-model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+  rag:
+    top-k: 5
+    score-threshold: 0.55
+    max-output-tokens: 800
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    vn.edu.tmdt: DEBUG
